@@ -1,6 +1,5 @@
 .App {
   text-align: center;
-  position: relative;
 }
 
 .App-logo {
@@ -10,9 +9,13 @@
 
 .App-header {
   background-color: #222;
-  height: 150px;
+  height: auto;
   padding: 20px;
   color: white;
+}
+
+.App-body {
+  position: relative;
 }
 
 .App-intro {
@@ -21,7 +24,7 @@
 
 .name-form {
   position: absolute;
-  top: 210px;
+  top: 20px;
   left: 0;
   width: 100%;
   z-index: 999;
@@ -40,10 +43,32 @@
 }
 
 .widget-container {
-  margin-top: 50px;
+  top: 50px;
+  position: relative;
 }
 
 @keyframes App-logo-spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+
+@media screen and (max-width: 414px) {
+  .name-form {
+    top: 0;
+  }
+  .name-form input, .name-form button {
+    height: 40px;
+  }
+  .name-form input {
+    width: calc(100% - 75px) !important;
+    padding-right: 70px;
+    border: none;
+    border-bottom: 1px solid #222;
+  }
+  .name-form button {
+    border: none;
+    width: 70px;
+    margin-left: -70px;
+    border-left: 1px solid #222;
+  }
 }

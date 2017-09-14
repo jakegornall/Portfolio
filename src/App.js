@@ -93,23 +93,25 @@ class App extends Component {
           <img src={logo} className="App-logo" alt="logo" />
           <h2>Welcome to Jake Gornall's Portfolio! (Built on React and Express)</h2>
         </div>
-        <form className="name-form" onSubmit={this.submitForm}>
-          <input
-            id="name-input"
-            type="text"
-            style={this.state.formStyle}
-            placeholder="Enter a name"
-            value={this.state.inputValue}
-            onChange={this.handleChange}
-            onFocus={this.formFocus}
-            onBlur={this.formBlur}
-          />
-          <button type="submit">Add</button>
-        </form>
-        <div className="widget-container">
-        {this.state.names.map((name, i) =>
-          <MyWidget key={i} name={name} />
-          )}
+        <div className="App-body">
+          <form className="name-form" onSubmit={this.submitForm}>
+            <input
+              id="name-input"
+              type="text"
+              style={this.state.formStyle}
+              placeholder="Enter a name"
+              value={this.state.inputValue}
+              onChange={this.handleChange}
+              onFocus={this.formFocus}
+              onBlur={this.formBlur}
+            />
+            <button type="submit">Add</button>
+          </form>
+          <div className="widget-container">
+          {this.state.names.map((name, i) =>
+            <MyWidget key={i} name={name} />
+            )}
+          </div>
         </div>
       </div>
     );
