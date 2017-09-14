@@ -1,0 +1,49 @@
+.App {
+  text-align: center;
+  position: relative;
+}
+
+.App-logo {
+  animation: App-logo-spin infinite 20s linear;
+  height: 80px;
+}
+
+.App-header {
+  background-color: #222;
+  height: 150px;
+  padding: 20px;
+  color: white;
+}
+
+.App-intro {
+  font-size: large;
+}
+
+.name-form {
+  position: absolute;
+  top: 210px;
+  left: 0;
+  width: 100%;
+  z-index: 999;
+}
+.name-form input {
+  height: 30px;
+  min-width: 75px;
+  line-height: 30px;
+  padding: 0 50px 0 5px;
+  transition: width .3s;
+}
+.name-form button {
+  height: 34px;
+  width: 50px;
+  margin-left: -50px;
+}
+
+.widget-container {
+  margin-top: 50px;
+}
+
+@keyframes App-logo-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
