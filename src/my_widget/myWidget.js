@@ -5,7 +5,6 @@ import './my-widget.css';
 class MyWidget extends Component {
   constructor(props) {
     super(props);
-    this.localStorageEnabled = typeof(Storage) !== "undefined";
     this.state = {
       name: props.name,
       id: props.id,
@@ -15,20 +14,9 @@ class MyWidget extends Component {
       }
     };
 
-    console.log(props);
-
     this.handleChange = this.handleChange.bind(this);
     this.submitName = this.submitName.bind(this);
     this.showForm = this.showForm.bind(this);
-    this.setLocalStorage = this.setLocalStorage.bind(this);
-  }
-
-  setLocalStorage() {
-    if (this.localStorageEnabled) {
-      var names = JSON.parse(localStorage.getItem("names"));
-      names[this.state.id] = this.state.name;
-      localStorage.setItem("names", JSON.stringify(names));
-    }
   }
 
   handleChange(e) {
@@ -57,7 +45,6 @@ class MyWidget extends Component {
   }
 
   showForm(e) {
-    console.log(this);
     this.setState({
       name: this.state.name,
       editMode: true,

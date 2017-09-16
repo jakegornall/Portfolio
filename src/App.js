@@ -2,11 +2,12 @@ import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
 import MyWidget from './my_widget/myWidget';
+import io from 'socket.io-client';
+let socket = io('http://localhost:3001')
 
 class App extends Component {
   constructor(props) {
     super(props);
-    this.localStorageEnabled = typeof(Storage) !== "undefined";
     this.state = {
       names: [],
       inputValue: '',
@@ -19,37 +20,23 @@ class App extends Component {
     this.handleChange = this.handleChange.bind(this);
     this.formFocus = this.formFocus.bind(this);
     this.formBlur = this.formBlur.bind(this);
-    this.getLocalStorage = this.getLocalStorage.bind(this);
-    this.setLocalStorage = this.setLocalStorage.bind(this);
   }
 
   componentDidMount() {
-    this.getLocalStorage();
-    this.getData();
-  }
-
-  getLocalStorage() {
-    if (this.localStorageEnabled && localStorage.getItem("names") !== null) {
-      this.setState({
-        names: JSON.parse(localStorage.getItem("names")),
-        inputValue: '',
-        formStyle: {
-          width: 75
-        }
+    socket.on('server:event', data => {
+      console.log(data);
+      this.setState({ 
+        names: data.names,
+        inputValue: this.state.inputValue,
+        formStyle: this.state.formStyle
       });
-    }
-  }
-
-  setLocalStorage() {
-    if (this.localStorageEnabled) {
-      var names = this.state.names;
-      localStorage.setItem("names", JSON.stringify(names));
-    }
+    });
   }
 
   submitForm(e) {
     e.preventDefault();
     this.state.names.push(this.state.inputValue);
+    socket.emit('client:sentMessage', this.state.inputValue);
     this.setState({
       names: this.state.names,
       inputValue: '',
@@ -57,7 +44,6 @@ class App extends Component {
         width: 75
       }
     });
-    this.setLocalStorage();
   }
 
   handleChange(e) {
@@ -73,17 +59,6 @@ class App extends Component {
   formBlur(e) {
     e.preventDefault();
     this.setState({names: this.state.names, inputValue: e.target.value, formStyle: {width: 75}});
-  }
-
-  getData() {
-    fetch('/api/test')
-      .then((response) => response.json())
-      .then((responseJson) => {
-        console.log(responseJson.data);
-      })
-      .catch((error) => {
-        console.error(error);
-      });
   }
 
   render() {
