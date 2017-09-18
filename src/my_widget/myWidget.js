@@ -6,75 +6,29 @@ class MyWidget extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      name: props.name,
-      id: props.id,
-      editMode: false,
-      formStyle: {
-        width: props.name.length > 0 ? props.name.length * 10 : 75
-      }
+      message: props.message,
+      editMode: false
     };
 
-    this.handleChange = this.handleChange.bind(this);
-    this.submitName = this.submitName.bind(this);
-    this.showForm = this.showForm.bind(this);
-  }
-
-  handleChange(e) {
-    this.setState({
-      name: e.target.value,
-      editMode: true,
-      nameChanged: true,
-      formStyle: {
-        width: e.target.value.length > 0 ? e.target.value.length * 10 : 75
-      }
-    });
-  }
-
-  submitName(e) {
-    e.preventDefault();
-    this.setState({
-      name: this.state.name,
-      editMode: false,
-      nameChanged: false,
-      formStyle: this.state.formStyle
-    });
+    this.socket = props.socket;
+    this.delete = this.delete.bind(this);
   }
 
   delete(e) {
     e.preventDefault();
-  }
-
-  showForm(e) {
-    this.setState({
-      name: this.state.name,
-      editMode: true,
-      nameChanged: false,
-      formStyle: this.state.formStyle
-    });
+    this.socket.emit('client:deleteMessage', this.state.message);
   }
 
   render() {
-
-    const showHideForm = {
-      'display': this.state.editMode ? 'block' : 'none'
-    };
-
-    const showHideName = {
-      'display': this.state.editMode ? 'none' : 'block'
-    };
-
-    const buttonText = this.state.nameChanged ? 'Change Name' : 'Cancel';
-
     return (
-      <div className="my-widget" onClick={this.showForm}>
+      <div className="my-widget">
+        <header className="my-widget-header">
           <img src={logo} className="App-logo" alt="logo" />
-          <h3 className="my-widget-name" style={showHideName} >{this.state.name}</h3>
-          <p style={showHideName} >click to edit...</p>
-          <form onSubmit={this.submitName} style={showHideForm} >
-            <input type="text" style={this.state.formStyle} value={this.state.name} onChange={this.handleChange} />
-            <button type="submit">{buttonText}</button>
-            <button onClick={this.delete} >Delete</button>
-          </form>
+          <h3 className="my-widget-sender" >{this.state.message.sender}</h3>
+          <p className="my-widget-date">{this.state.message.date}</p>
+        </header>
+        <p className="my-widget-message">{this.state.message.body}</p>
+        <button onClick={this.delete} >Delete</button>
       </div>
     );
   }

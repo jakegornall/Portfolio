@@ -20,27 +20,32 @@
 }
 
 .name-form {
-  position: absolute;
-  top: 210px;
-  left: 0;
   width: 100%;
-  z-index: 999;
+  max-width: 500px;
+  margin: 10px auto 0 auto;
 }
 .name-form input {
-  height: 30px;
-  min-width: 75px;
-  line-height: 30px;
-  padding: 0 50px 0 5px;
-  transition: width .3s;
+  height: 32px;
+  width: calc(100% - 2px);
+  line-height: 32px;
+  padding: 0;
+  border: 1px solid #363636;
 }
 .name-form button {
   height: 34px;
   width: 50px;
   margin-left: -50px;
+  border: 1px solid #363636;
 }
 
 .widget-container {
-  margin-top: 50px;
+  margin: 0 auto 0 auto;
+  max-width: 498px;
+  width: 100%;
+  border: 1px solid #363636;
+  border-top: none;
+  max-height: 300px;
+  overflow-y: scroll;
 }
 
 @keyframes App-logo-spin {

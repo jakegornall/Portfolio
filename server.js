@@ -3,21 +3,54 @@ var path = require('path');
 var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
+var mongoose = require('mongoose');
+mongoose.Promise = global.Promise;
 
-var data = {names:["Jake Gornall", "Jessi Spencer"]};
+mongoose.connect('mongodb://localhost/Portfolio', { useMongoClient: true });
+
+var Schema = mongoose.Schema,
+		ObjectId = Schema.ObjectId;
+
+var MessageSchema = new Schema({
+	id: ObjectId,
+	sender: String,
+	body: String,
+	date: Date
+});
+
+var Message = mongoose.model('Message', MessageSchema);
 
 app.get('/', function(req, res){
 	res.sendFile(__dirname + '/build/index.html');
 });
 
 io.on('connection', function(socket) {
+	function refreshAll() {
+		Message.find(function(err, messages) { 
+			if (!err) { 
+				io.emit('server:event', messages);
+			}
+		});
+	}
 	console.log('a user connected');
-	socket.emit('server:event', data);
-	socket.on('client:sentMessage', message => {
-		data.names.push(message);
-		console.log(message);
-		console.log(data);
-		io.emit('server:event', data);
+	refreshAll();
+	
+	socket.on('client:sentMessage', data => {
+		var msg = new Message({ sender: data.sender, body: data.body, date: Date.now() });
+		msg.save(function(err) {
+			if (err) {
+				console.log(err);
+			} else {
+				refreshAll();
+			}
+		});
+	});
+	socket.on('client:deleteMessage', message => {
+		Message.deleteOne({ id: message.id }, function(err) {
+			if (!err) {
+				refreshAll();
+			}
+		});
 	});
 });
 
