@@ -48,7 +48,9 @@
   "scripts": {
     "start": "concurrently \"node scripts/start.js\" \"nodemon server.js\"",
     "build": "node scripts/build.js",
-    "test": "node scripts/test.js --env=jsdom"
+    "test": "node scripts/test.js --env=jsdom",
+    "mongoinit": "scripts/mongoinit.sh",
+    "mongorun": "mongod --dbpath /data/db"
   },
   "jest": {
     "collectCoverageFrom": [
