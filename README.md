@@ -1,4 +1,4 @@
-My portfolio built using create-react-app, React, and Express
+My portfolio built using create-react-app, React, Express, Socket.io, and MongoDB.
 
 # How to run:
 1. ```$ npm install```
