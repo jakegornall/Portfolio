@@ -58,6 +58,10 @@
   cursor: pointer;
 }
 
+.App-body {
+  position: relative;
+}
+
 .App-intro {
   font-size: large;
 }
