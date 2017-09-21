@@ -1,118 +1,79 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
+import profilePic from './Jake_Gornall_Photo.jpg';
 import './App.css';
-import MyWidget from './my_widget/myWidget';
+import io from 'socket.io-client';
+import MessageWidget from './my_widget/myWidget';
+let socket = io('http://localhost:3001')
 
 class App extends Component {
   constructor(props) {
     super(props);
-    this.localStorageEnabled = typeof(Storage) !== "undefined";
     this.state = {
-      names: [],
-      inputValue: '',
-      formStyle: {
-        width: 75
-      }
+      messages: [],
+      senderInput: '',
+      bodyInput: ''
     };
 
     this.submitForm = this.submitForm.bind(this);
-    this.handleChange = this.handleChange.bind(this);
-    this.formFocus = this.formFocus.bind(this);
-    this.formBlur = this.formBlur.bind(this);
-    this.getLocalStorage = this.getLocalStorage.bind(this);
-    this.setLocalStorage = this.setLocalStorage.bind(this);
+    this.handleNameChange = this.handleNameChange.bind(this);
+    this.handleBodyChange = this.handleBodyChange.bind(this);
   }
 
   componentDidMount() {
-    this.getLocalStorage();
-    this.getData();
-  }
-
-  getLocalStorage() {
-    if (this.localStorageEnabled && localStorage.getItem("names") !== null) {
-      this.setState({
-        names: JSON.parse(localStorage.getItem("names")),
-        inputValue: '',
-        formStyle: {
-          width: 75
-        }
-      });
-    }
-  }
-
-  setLocalStorage() {
-    if (this.localStorageEnabled) {
-      var names = this.state.names;
-      localStorage.setItem("names", JSON.stringify(names));
-    }
+    socket.on('server:event', data => {
+      this.setState({ messages: data, senderInput: this.state.senderInput });
+    });
   }
 
   submitForm(e) {
     e.preventDefault();
-    this.state.names.push(this.state.inputValue);
-    this.setState({
-      names: this.state.names,
-      inputValue: '',
-      formStyle: {
-        width: 75
-      }
+    socket.emit('client:sentMessage', {
+      sender: this.state.senderInput,
+      body: this.state.bodyInput
     });
-    this.setLocalStorage();
+    this.setState({ messages: this.state.messages, senderInput: '', bodyInput: ''});
   }
 
-  handleChange(e) {
-    var len = e.target.value.length * 7 > 200 ? e.target.value.length * 7 : 200;
-    this.setState({names: this.state.names, inputValue: e.target.value, formStyle: {width: len}});
+  handleNameChange(e) {
+    this.setState({messages: this.state.messages, senderInput: e.target.value, bodyInput: this.state.bodyInput});
   }
 
-  formFocus(e) {
-    e.preventDefault();
-    this.setState({names: this.state.names, inputValue: e.target.value, formStyle: {width: 200}});
-  }
-
-  formBlur(e) {
-    e.preventDefault();
-    this.setState({names: this.state.names, inputValue: e.target.value, formStyle: {width: 75}});
-  }
-
-  getData() {
-    fetch('/api/test')
-      .then((response) => response.json())
-      .then((responseJson) => {
-        console.log(responseJson.data);
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+  handleBodyChange(e) {
+    this.setState({messages: this.state.messages, senderInput: this.state.senderInput, bodyInput: e.target.value});
   }
 
   render() {
+    var messageList = this.state.messages.map((msg) =>
+      <MessageWidget message={msg} key={msg._id} socket={socket} />
+    );
     return (
       <div className="App">
         <div className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h2>Welcome to Jake Gornall's Portfolio! (Built on React and Express)</h2>
-        </div>
-        <div className="App-body">
-          <form className="name-form" onSubmit={this.submitForm}>
-            <input
-              id="name-input"
-              type="text"
-              style={this.state.formStyle}
-              placeholder="Enter a name"
-              value={this.state.inputValue}
-              onChange={this.handleChange}
-              onFocus={this.formFocus}
-              onBlur={this.formBlur}
-            />
-            <button type="submit">Add</button>
-          </form>
-          <div className="widget-container">
-          {this.state.names.map((name, i) =>
-            <MyWidget key={i} name={name} />
-            )}
+          <img src={profilePic} className="profile-photo" alt="Jake Gornall" />
+          <div className="header-title-container">
+            <h2>Welcome to Jake Gornall's Portfolio!</h2>
+            <h3>(Built on React, Express, Socket.io, and MongoDB)</h3>
+          </div>
+          <div className="menu-icons-container">
+            <a href="tel:7404387924" className="contact-btn">✆</a>
+            <a className="contact-btn">✉</a>
           </div>
         </div>
+        <section className="widget-container">
+          { messageList }
+        </section>
+        <form className="name-form" onSubmit={this.submitForm}>
+          <input
+            type="text"
+            placeholder="Enter a name"
+            value={this.state.senderInput}
+            onChange={this.handleNameChange}
+          />
+          <textarea id="message-input" onChange={this.handleBodyChange} value={this.state.bodyInput} />
+          <button type="submit">Add</button>
+        </form>
+        <footer>
+        </footer>
       </div>
     );
   }

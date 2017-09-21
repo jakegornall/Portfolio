@@ -1,5 +1,5 @@
 .App {
-  text-align: center;
+  position: relative;
 }
 
 .App-logo {
@@ -8,10 +8,54 @@
 }
 
 .App-header {
-  background-color: #222;
-  height: auto;
+  background-color: #2a63b9;
   padding: 20px;
   color: white;
+}
+.App-header h2, h3 {
+  margin: 5px;
+}
+
+.profile-photo {
+  border-radius: 50%;
+  width: 100px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.header-title-container {
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: 5px;
+}
+
+.menu-icons-container {
+  float: right;
+  margin-top: 20px;
+}
+
+.contact-btn {
+  border-radius: 50%;
+  outline: none;
+  text-align: center;
+  border: none;
+  font-size: 50px;
+  display: inline-block;
+  vertical-align: middle;
+  text-decoration: none;
+  margin: 0 5px;
+  padding: 0;
+  height: 50px;
+  width: 50px;
+  color: black;
+  font-style: none;
+  line-height: 50px;
+  background-color: white;
+}
+
+.contact-btn:hover {
+  animation: Btn-Jump .5s;
+  cursor: pointer;
 }
 
 .App-body {
@@ -23,28 +67,44 @@
 }
 
 .name-form {
-  position: absolute;
-  top: 20px;
-  left: 0;
   width: 100%;
-  z-index: 999;
+  max-width: 510px;
+  margin: 10px auto 0 auto;
 }
 .name-form input {
-  height: 30px;
-  min-width: 75px;
-  line-height: 30px;
-  padding: 0 50px 0 5px;
-  transition: width .3s;
+  height: 32px;
+  width: calc(100% - 16px);
+  line-height: 32px;
+  padding: 7px;
+  border: 1px solid #363636;
+  border-bottom: none;
+}
+.name-form #message-input {
+  width: calc(100% - 12px);
+  max-width: calc(100% - 12px);
+  padding: 5px;
+  height: 60px;
+  border-right: 1px solid #363636;
+  border-left: 1px solid #363636;
 }
 .name-form button {
   height: 34px;
-  width: 50px;
-  margin-left: -50px;
+  width: 100%;
+  margin: -5px 0 5px 0;
+  border: 1px solid #363636;
 }
 
 .widget-container {
-  top: 50px;
-  position: relative;
+  margin: 10px auto 0 auto;
+  padding: 15px 5px 5px 5px;
+  max-width: 498px;
+  width: 100%;
+  height: 275px;
+  overflow-y: scroll;
+  border: 1px solid #d4eeff;
+  -webkit-box-shadow: -1px 4px 22px -2px rgba(115,115,115,1);
+  -moz-box-shadow: -1px 4px 22px -2px rgba(115,115,115,1);
+  box-shadow: -1px 4px 22px -2px rgba(115,115,115,1);
 }
 
 @keyframes App-logo-spin {
@@ -52,23 +112,8 @@
   to { transform: rotate(360deg); }
 }
 
-@media screen and (max-width: 414px) {
-  .name-form {
-    top: 0;
-  }
-  .name-form input, .name-form button {
-    height: 40px;
-  }
-  .name-form input {
-    width: calc(100% - 75px) !important;
-    padding-right: 70px;
-    border: none;
-    border-bottom: 1px solid #222;
-  }
-  .name-form button {
-    border: none;
-    width: 70px;
-    margin-left: -70px;
-    border-left: 1px solid #222;
-  }
+@keyframes Btn-Jump {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+  100% { transform: translateY(0px); }
 }
