@@ -49,7 +49,6 @@ io.on('connection', function(socket) {
 		});
 	});
 	socket.on('client:deleteMessage', message => {
-		console.log(message._id);
 		Message.deleteOne({ _id: message._id }, function(err) {
 			if (!err) {
 				refreshAll();
