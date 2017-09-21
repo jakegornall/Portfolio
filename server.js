@@ -6,7 +6,10 @@ var io = require('socket.io')(http);
 var mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
 
-mongoose.connect('mongodb://localhost/Portfolio', { useMongoClient: true });
+mongoose.connect('mongodb://localhost/Portfolio', { useMongoClient: true })
+.catch(function(err) {
+	console.log(err);
+});
 
 var Schema = mongoose.Schema,
 		ObjectId = Schema.ObjectId;
@@ -46,7 +49,8 @@ io.on('connection', function(socket) {
 		});
 	});
 	socket.on('client:deleteMessage', message => {
-		Message.deleteOne({ id: message.id }, function(err) {
+		console.log(message._id);
+		Message.deleteOne({ _id: message._id }, function(err) {
 			if (!err) {
 				refreshAll();
 			}

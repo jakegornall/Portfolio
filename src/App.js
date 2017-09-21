@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
+import profilePic from './Jake_Gornall_Photo.jpg';
 import './App.css';
 import io from 'socket.io-client';
 import MessageWidget from './my_widget/myWidget';
@@ -10,69 +10,70 @@ class App extends Component {
     super(props);
     this.state = {
       messages: [],
-      inputValue: ''
+      senderInput: '',
+      bodyInput: ''
     };
 
     this.submitForm = this.submitForm.bind(this);
-    this.handleChange = this.handleChange.bind(this);
-    this.formFocus = this.formFocus.bind(this);
-    this.formBlur = this.formBlur.bind(this);
+    this.handleNameChange = this.handleNameChange.bind(this);
+    this.handleBodyChange = this.handleBodyChange.bind(this);
   }
 
   componentDidMount() {
     socket.on('server:event', data => {
-      this.setState({ messages: data, inputValue: this.state.inputValue });
+      this.setState({ messages: data, senderInput: this.state.senderInput });
     });
   }
 
   submitForm(e) {
     e.preventDefault();
-    this.state.messages.push(this.state.inputValue);
     socket.emit('client:sentMessage', {
-      sender: "Jake Gornall",
-      body: "Hello, This is a message!"
+      sender: this.state.senderInput,
+      body: this.state.bodyInput
     });
+    this.setState({ messages: this.state.messages, senderInput: '', bodyInput: ''});
   }
 
-  handleChange(e) {
-    this.setState({messages: this.state.messages, inputValue: e.target.value});
+  handleNameChange(e) {
+    this.setState({messages: this.state.messages, senderInput: e.target.value, bodyInput: this.state.bodyInput});
   }
 
-  formFocus(e) {
-    e.preventDefault();
-    this.setState({messages: this.state.messages, inputValue: e.target.value});
-  }
-
-  formBlur(e) {
-    e.preventDefault();
-    this.setState({messages: this.state.messages, inputValue: e.target.value});
+  handleBodyChange(e) {
+    this.setState({messages: this.state.messages, senderInput: this.state.senderInput, bodyInput: e.target.value});
   }
 
   render() {
-    const messageList = this.state.messages.map((msg, i) =>
-      <MessageWidget message={msg} key={i} socket={socket} />
+    var messageList = this.state.messages.map((msg) =>
+      <MessageWidget message={msg} key={msg._id} socket={socket} />
     );
     return (
       <div className="App">
         <div className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h2>Welcome to Jake Gornall's Portfolio! (Built on React, Express, Socket.io, and MongoDB)</h2>
+          <img src={profilePic} className="profile-photo" alt="Jake Gornall" />
+          <div className="header-title-container">
+            <h2>Welcome to Jake Gornall's Portfolio!</h2>
+            <h3>(Built on React, Express, Socket.io, and MongoDB)</h3>
+          </div>
+          <div className="menu-icons-container">
+            <a href="tel:7404387924" className="contact-btn">✆</a>
+            <a className="contact-btn">✉</a>
+          </div>
         </div>
-        <form className="name-form" onSubmit={this.submitForm}>
-          <input
-            id="name-input"
-            type="text"
-            placeholder="Enter a name"
-            value={this.state.inputValue}
-            onChange={this.handleChange}
-            onFocus={this.formFocus}
-            onBlur={this.formBlur}
-          />
-          <button type="submit">Add</button>
-        </form>
         <section className="widget-container">
           { messageList }
         </section>
+        <form className="name-form" onSubmit={this.submitForm}>
+          <input
+            type="text"
+            placeholder="Enter a name"
+            value={this.state.senderInput}
+            onChange={this.handleNameChange}
+          />
+          <textarea id="message-input" onChange={this.handleBodyChange} value={this.state.bodyInput} />
+          <button type="submit">Add</button>
+        </form>
+        <footer>
+        </footer>
       </div>
     );
   }
