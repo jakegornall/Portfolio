@@ -27,11 +27,13 @@ class App extends Component {
 
   submitForm(e) {
     e.preventDefault();
-    socket.emit('client:sentMessage', {
-      sender: this.state.senderInput,
-      body: this.state.bodyInput
-    });
-    this.setState({ messages: this.state.messages, senderInput: '', bodyInput: ''});
+    if (this.state.senderInput.length > 0 && this.state.bodyInput.length > 0) {
+      socket.emit('client:sentMessage', {
+        sender: this.state.senderInput,
+        body: this.state.bodyInput
+      });
+      this.setState({ messages: this.state.messages, senderInput: '', bodyInput: ''});  
+    }
   }
 
   handleNameChange(e) {

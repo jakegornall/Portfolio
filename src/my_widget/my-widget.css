@@ -4,12 +4,12 @@
 	width: 100%;
 	text-align: left;
 	background-color: white;
-	border: 1px solid #2a63b9;
+	border: 1px solid #4381e0;
 	position: relative;
 }
 .my-widget-header {
 	margin-bottom: 10px;
-	background-color: #2a63b9;
+	background-color: #4381e0;
 	color: white;
 	padding: 3px 0;
 }
