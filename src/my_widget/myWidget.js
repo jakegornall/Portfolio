@@ -18,16 +18,20 @@ class MyWidget extends Component {
   }
 
   render() {
+    var date = new Date(this.props.message.date);
+    var formattedDate = date.toDateString();
+    var time = date.toLocaleTimeString();
     return (
       <div className="my-widget">
         <header className="my-widget-header">
           <img src={logo} className="App-logo" alt="logo" />
           <div className="title-container">
             <h3 className="my-widget-sender" >{this.props.message.sender}</h3>
-            <p className="my-widget-date">{this.props.message.date}</p>
+            <p className="my-widget-date">{formattedDate}</p>
+            <p className="my-widget-time">{time}</p>
           </div>
         </header>
-        <p className="my-widget-message">{this.props.message.body}</p>
+        <pre className="my-widget-message">{this.props.message.body}</pre>
         <button onClick={this.delete}>X</button>
       </div>
     );

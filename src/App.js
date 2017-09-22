@@ -71,8 +71,8 @@ class App extends Component {
             value={this.state.senderInput}
             onChange={this.handleNameChange}
           />
-          <textarea id="message-input" onChange={this.handleBodyChange} value={this.state.bodyInput} />
-          <button type="submit">Add</button>
+          <textarea id="message-input" onChange={this.handleBodyChange} value={this.state.bodyInput} placeholder="Type your message in here!" />
+          <button type="submit">Send</button>
         </form>
         <footer>
         </footer>
