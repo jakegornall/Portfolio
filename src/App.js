@@ -1,53 +1,29 @@
 import React, { Component } from 'react';
 import profilePic from './Jake_Gornall_Photo.jpg';
 import './App.css';
+import ChatApp from './ChatApp/ChatApp.js';
+import SignInSignUp from './SignInSignUp/SignInSignUp.js';
 import io from 'socket.io-client';
-import MessageWidget from './my_widget/myWidget';
 let socket = io('http://localhost:3001')
 
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      messages: [],
-      senderInput: '',
-      bodyInput: ''
+      username: null,
+      isLoggedIn: false
     };
-
-    this.submitForm = this.submitForm.bind(this);
-    this.handleNameChange = this.handleNameChange.bind(this);
-    this.handleBodyChange = this.handleBodyChange.bind(this);
   }
 
   componentDidMount() {
-    socket.on('server:event', data => {
-      this.setState({ messages: data, senderInput: this.state.senderInput });
+    socket.on('server:sessionStatus', data => {
+      this.setState(data);
+      console.log(data);
     });
   }
 
-  submitForm(e) {
-    e.preventDefault();
-    if (this.state.senderInput.length > 0 && this.state.bodyInput.length > 0) {
-      socket.emit('client:sentMessage', {
-        sender: this.state.senderInput,
-        body: this.state.bodyInput
-      });
-      this.setState({ messages: this.state.messages, senderInput: '', bodyInput: ''});  
-    }
-  }
-
-  handleNameChange(e) {
-    this.setState({messages: this.state.messages, senderInput: e.target.value, bodyInput: this.state.bodyInput});
-  }
-
-  handleBodyChange(e) {
-    this.setState({messages: this.state.messages, senderInput: this.state.senderInput, bodyInput: e.target.value});
-  }
-
   render() {
-    var messageList = this.state.messages.map((msg) =>
-      <MessageWidget message={msg} key={msg._id} socket={socket} />
-    );
+    var mainContent = this.state.isLoggedIn ? <ChatApp socket={socket} /> : <SignInSignUp socket={socket} />;
     return (
       <div className="App">
         <div className="App-header">
@@ -61,19 +37,7 @@ class App extends Component {
             <a className="contact-btn">✉</a>
           </div>
         </div>
-        <section className="widget-container">
-          { messageList }
-        </section>
-        <form className="name-form" onSubmit={this.submitForm}>
-          <input
-            type="text"
-            placeholder="Enter a name"
-            value={this.state.senderInput}
-            onChange={this.handleNameChange}
-          />
-          <textarea id="message-input" onChange={this.handleBodyChange} value={this.state.bodyInput} placeholder="Type your message in here!" />
-          <button type="submit">Send</button>
-        </form>
+        {mainContent}
         <footer>
         </footer>
       </div>
