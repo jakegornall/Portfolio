@@ -4,7 +4,7 @@ var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var passHash = require('password-hash');
-var session = require('express-session');
+const cryptoRandomString = require('crypto-random-string');
 var mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
 
@@ -19,100 +19,120 @@ var Schema = mongoose.Schema,
 var UserSchema = new Schema({
 	id: ObjectId,
 	username: String,
-	hashedPassword: String
+	hashedPassword: String,
+	rooms: [{ roomId: String }],
+	sessionToken: String,
+	active: Boolean
 });
 
-var ConvoSchema = new Schema({
-	id: ObjectId
-});
-
-var MessageSchema = new Schema({
+var RoomSchema = new Schema({
 	id: ObjectId,
-	convo: String,
-	sender: String,
-	senderId: String,
-	body: String,
-	date: Date
-});
+	messages: [{
+		id: ObjectId,
+		sender: String,
+		body: String,
+		date: Date
+	}]
+})
 
 var User = mongoose.model('User', UserSchema);
-var Convo = mongoose.model('Convo', ConvoSchema);
-var Message = mongoose.model('Message', MessageSchema);
+var Room = mongoose.model('Room', RoomSchema);
 
 app.get('/', function(req, res){
 	res.sendFile(__dirname + '/build/index.html');
 });
 
 io.on('connection', function(socket) {
-	if (session.userId) {
-		User.find({ _id: session.userId }, function(err, user) {
-			if (!err) {
-				socket.emit('server:sessionStatus', {
-					isLoggedIn: true,
-					username: user.username
-				})
-			}
-		});
-	} else {
-		socket.emit('server:sessionStatus', {
-			isLoggedIn: false,
-			username: null
-		});
-
-		socket.on('client:signup', data => {
-			User.find({ username: data.username }, function(err, user) {
-				if (user.length < 1) {
-					console.log("made it");
-					var hashPassword = passHash.generate(data.password, { algorithm: 'sha256' });
-					var newUser = new User({ username: data.username, hashedPassword: hashPassword });
-					newUser.save(function(err, user) {
-						if (err) {
-							socket.emit('server:sessionStatus', {
-								isLoggedIn: false,
-								username: null
-							});
-						} else {
-							socket.emit('server:sessionStatus', {
-								isLoggedIn: true,
-								username: newUser.username
-							});
-						}
+	socket.on('client:authenticate', token => {
+		User.findOne({ sessionToken: token }, function(err, user) {
+			if (!err && user) {
+				if (token === user.sessionToken) {
+					socket.emit('server:sessionStatus', {
+						isLoggedIn: true,
+						username: user.username,
+						rooms: user.rooms,
+						sessionToken: user.sessionToken
+					});	
+				} else {
+					socket.emit('server:sessionStatus', {
+						isLoggedIn: false
 					});
 				}
-			});
+			} else {
+				socket.emit('server:sessionStatus', {
+					isLoggedIn: false
+				});
+			}
 		});
+	});
 
-		socket.on('client:checkExistingUsername', username => {
-			User.find({ username: username }, function(err, users) {
-				if (users.length === 0) {
-					socket.emit('server:checkExistingUsername', { available: true });
-				} else {
-					socket.emit('server:checkExistingUsername', { available: false });
-				}
-			})
-		})
-
-		socket.on('client:signin', data => {
-			User.find({ username: data.username }, function(err, user) {
-				if (user.length > 0) {
-					if (passHash.verify(data.password, user[0].hashedPassword)) {
+	socket.on('client:signup', data => {
+		User.find({ username: data.username }, function(err, user) {
+			if (user.length < 1) {
+				var hashPassword = passHash.generate(data.password, { algorithm: 'sha256' });
+				var newUser = new User({
+					username: data.username,
+					hashedPassword: hashPassword,
+					sessionToken: cryptoRandomString(64),
+					active: true
+				});
+				newUser.save(function(err, user) {
+					if (err) {
 						socket.emit('server:sessionStatus', {
-							isLoggedIn: true,
-							username: user[0].username
+							isLoggedIn: false
 						});
 					} else {
 						socket.emit('server:sessionStatus', {
-							isLoggedIn: false,
-							username: null
+							isLoggedIn: true,
+							username: newUser.username,
+							sessionToken: newUser.sessionToken
 						});
-						socket.emit('server:signinError', {msg: "Password Incorrect"});
 					}
-				} else {
-					socket.emit('server:signinError', {msg: "Username Not Found"});
-				}
-			});
+				});
+			}
 		});
-	}
+	});
+
+	socket.on('client:checkExistingUsername', username => {
+		User.find({ username: username }, function(err, users) {
+			if (users.length === 0) {
+				socket.emit('server:checkExistingUsername', { available: true });
+			} else {
+				socket.emit('server:checkExistingUsername', { available: false });
+			}
+		})
+	});
+
+	socket.on('client:signin', data => {
+		User.findOne({ username: data.username }, function(err, user) {
+			if (!err) {
+				if (passHash.verify(data.password, user.hashedPassword)) {
+					user.sessionToken = cryptoRandomString(64);
+					user.active = true;
+					user.save(function(err, savedUser) {
+						if (!err) {
+							socket.emit('server:sessionStatus', {
+								isLoggedIn: true,
+								username: savedUser.username,
+								sessionToken: savedUser.sessionToken
+							});		
+						} else {
+							socket.emit('server:sessionStatus', {
+								isLoggedIn: false
+							});
+						}
+					});
+				} else {
+					socket.emit('server:sessionStatus', {
+						isLoggedIn: false
+					});
+					socket.emit('server:signinError', {msg: "Password Incorrect"});
+				}
+			} else {
+				socket.emit('server:signinError', {msg: "Username Not Found"});
+			}
+		});
+	});
 });
 
 // static files

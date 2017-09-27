@@ -11,15 +11,29 @@ class App extends Component {
     super(props);
     this.state = {
       username: null,
-      isLoggedIn: false
+      isLoggedIn: false,
+      sessionToken: null
     };
   }
 
   componentDidMount() {
     socket.on('server:sessionStatus', data => {
       this.setState(data);
-      console.log(data);
+      console.log(this.state);
+      if (this.state.sessionToken) {
+        if (window.localStorage) {
+          window.localStorage.setItem('sessionToken', this.state.sessionToken);
+        }
+      } else {
+        if (window.localStorage) {
+          window.localStorage.removeItem('sessionToken');
+        }
+      }
     });
+
+    if (window.localStorage.getItem('sessionToken')) {
+      socket.emit('client:authenticate', window.localStorage.getItem('sessionToken'));
+    }
   }
 
   render() {
