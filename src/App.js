@@ -12,7 +12,8 @@ class App extends Component {
     this.state = {
       username: null,
       isLoggedIn: false,
-      sessionToken: null
+      sessionToken: null,
+      rooms: []
     };
   }
 
@@ -37,7 +38,7 @@ class App extends Component {
   }
 
   render() {
-    var mainContent = this.state.isLoggedIn ? <ChatApp socket={socket} /> : <SignInSignUp socket={socket} />;
+    var mainContent = this.state.isLoggedIn ? <ChatApp socket={socket} rooms={this.state.rooms } /> : <SignInSignUp socket={socket} />;
     return (
       <div className="App">
         <div className="App-header">
