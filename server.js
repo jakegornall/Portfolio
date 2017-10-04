@@ -67,6 +67,9 @@ io.on('connection', function(socket) {
 							rooms: user.rooms,
 							sessionToken: user.sessionToken
 						});
+						User.find({ active: true }, 'username', function(err, users) {
+							io.emit("server:availableUsers", users);
+						});
 					});	
 				} else {
 					socket.emit('server:sessionStatus', {
@@ -106,6 +109,9 @@ io.on('connection', function(socket) {
 							sessionToken: newUser.sessionToken,
 							rooms: newUser.rooms
 						});
+						User.find({ active: true }, 'username', function(err, users) {
+							io.emit("server:availableUsers", users);
+						});
 					}
 				});
 			}
@@ -138,7 +144,10 @@ io.on('connection', function(socket) {
 								username: savedUser.username,
 								sessionToken: savedUser.sessionToken,
 								rooms: savedUser.rooms
-							});		
+							});
+							User.find({ active: true }, 'username', function(err, users) {
+								io.emit("server:availableUsers", users);
+							});	
 						} else {
 							socket.emit('server:sessionStatus', {
 								isLoggedIn: false
@@ -170,7 +179,6 @@ io.on('connection', function(socket) {
 							socket.handshake.session.user.rooms.push({ room: newRoom._id, user: rec.username });
 							socket.handshake.session.save();
 							socket.handshake.session.user.save(function(err, savedUser) {
-								console.log(err);
 								io.to(rec.socketId).emit('newchatrequest', {
 									user: socket.handshake.session.user.username,
 									room: newRoom._id
@@ -190,33 +198,51 @@ io.on('connection', function(socket) {
 	socket.on('client:acceptchatrequest', req => {
 		if (socket.handshake.session.user) {
 			if (socket.handshake.session.user.active) {
-				Room.findOne({ id: req.room }, function(err, room) {
+				Room.findOne({ _id: req.room }, function(err, room) {
 					if (room) {
 						socket.join(room._id);
-						room.messages.append({
+						room.messages.push({
 							sender: socket.handshake.session.user.username,
 							body: socket.handshake.session.user.username + " just joined!",
 							date: Date.now()
 						});
 						room.save(function(err, savedRoom) {
 							if (!err) {
-								io.in(savedRoom._id).emit('messagesUpdate', newRoom.messages);
-								socket.handshake.session.user.rooms.push({ room: newRoom._id, user: req.username });
+								io.in(savedRoom._id).emit('messagesUpdate', savedRoom.messages);
+								socket.handshake.session.user.rooms.push({ room: savedRoom._id, user: req.user });
 								socket.handshake.session.user.save(function(err, savedUser) {
 									if (!err) {
 										socket.handshake.session.save();
+										console.log(req);
 										socket.emit("server:joinedroom", {
 											room: savedRoom._id,
-											user: req.username
+											user: req.user
 										});
 									}
 								});
 							}
 						});
-						
 					}
 				});
 			}
+		}
+	});
+
+	socket.on('client:getroomdata', data => {
+		if (socket.handshake.session.user) {
+			if (data.sessionToken === socket.handshake.session.user.sessionToken) {
+				Room.findOne({ _id: data.roomId }, function(err, room) {
+					if (room) {
+						socket.emit("server:getroomdata", {
+							messages: room.messages
+						});
+					}
+				});
+			}
+		} else {
+			socket.emit('server:sessionStatus', {
+				isLoggedIn: false
+			});
 		}
 	});
 });

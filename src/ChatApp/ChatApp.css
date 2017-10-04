@@ -1,9 +1,20 @@
+.Chat-App {
+	margin: 10px auto 10px auto;
+	width: 100%;
+	max-width: 600px;
+	box-sizing: border-box;
+	border: 1px solid black;
+}
 .chat-requests {
 	position: fixed;
 	top: 0;
 	right: 0;
 	padding: 10px;
 	margin: 0;
+}
+
+.chat-requests {
+	box-sizing: border-box;
 }
 
 .chat-request {
@@ -19,4 +30,33 @@
 	margin: 0;
 	padding: 5px;
 	width: 50%;
+}
+
+.room-tabs {
+	width: 100%;
+	box-sizing: border-box;
+	border-bottom: 1px solid black;
+}
+
+.room-tab {
+	display: inline-block;
+	border: 1px solid black;
+	padding: 10px;
+}
+.room-tab p {
+	margin: 0;
+}
+
+.available-users {
+	display: inline-block;
+	border: 1px solid black;
+	width: 25%;
+	box-sizing: border-box;
+}
+.available-user  {
+	padding: 10px;
+	border-bottom: 1px solid black;
+}
+.available-user p {
+	margin: 0;
 }

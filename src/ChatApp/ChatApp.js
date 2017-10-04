@@ -1,13 +1,15 @@
 import React, { Component } from 'react';
 import './ChatApp.css';
+import RoomApp from './RoomApp/RoomApp.js';
 
 class ChatApp extends Component {
   constructor(props) {
     super(props);
     this.state = {
       rooms: this.props.rooms,
-      currentRoom: null,
-      chatRequests: []
+      currentRoom: this.props.rooms[0].room,
+      chatRequests: [],
+      availableUsers: []
     }
   }
 
@@ -20,19 +22,21 @@ class ChatApp extends Component {
 
     this.props.socket.on("server:joinedroom", data => {
       var rooms = this.state.rooms.slice();
+      console.log(data);
       rooms.push(data);
       this.setState({ rooms: rooms, currentRoom: data.room });
+    });
+
+    this.props.socket.on("server:availableUsers", data => {
+      this.setState({ availableUsers: data });
     });
   }
 
   acceptRequest(request, i) {
     this.props.socket.emit("client:acceptchatrequest", request);
-    var rooms = this.state.rooms.slice();
-    rooms.push(request);
     var requests = this.state.chatRequests.slice();
     requests.pop(i);
     this.setState({
-      rooms: rooms,
       currentRoom: request.room,
       chatRequests: requests
     });
@@ -49,7 +53,7 @@ class ChatApp extends Component {
   render() {
     var requests = this.state.chatRequests.map((request, i) => {
       return (
-        <div className="chat-request">
+        <div key={i} className="chat-request">
           <p className="chat-request-msg">{request.user} wants to chat!</p>
           <p className="accept-chat" onClick={this.acceptRequest.bind(this, request, i)}>Accept</p>
           <p className="decline-chat">Decline</p>
@@ -60,21 +64,35 @@ class ChatApp extends Component {
     var rooms = this.state.rooms.map((room, i) => {
       return (
         <div key={i} className="room-tab" onClick={this.selectRoom.bind(this, room.room)}>
-          <p>Tab: {room.user}</p>
+          <p>{room.user}</p>
         </div>
       );
     });
 
+    var availableUsers = this.state.availableUsers.map((user, i) => {
+      if (user.username !== this.props.username) { 
+        return (
+          <div key={i} className="available-user" onClick={this.requestChat.bind(this, user.username)}>
+            <p>{user.username}</p>
+          </div>
+        );
+      } else {
+        return null;
+      }
+    });
+
     return (
-      <div className="ChatApp">
+      <div className="Chat-App">
         <div className="chat-requests">
           {requests}
         </div>
         <div className="room-tabs">
           {rooms}
         </div>
-        <p>Current Room: {this.state.currentRoom}</p>
-        <button onClick={this.requestChat.bind(this, "jessispencer")}>Request</button>
+        <RoomApp room={this.state.currentRoom} socket={this.props.socket} sessionToken={this.props.sessionToken} />
+        <div className="available-users">
+          {availableUsers}
+        </div>
       </div>
     );
   }
